@@ -1,0 +1,1 @@
+python ShellParser.py C:\temp\batch2 v_sys_parse.csv *.*sh *.log,*tar.Z,*.o,*.so,*.list
