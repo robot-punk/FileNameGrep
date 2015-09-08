@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<http-conf>
+  <url>http://example.com/</url>
+  <post-params>im_user: aoyagi, im_password: aoyagi</post-params>
+  <req_header_params>Content-Type: application/x-www-form-urlencoded</req_header_params>
+</http-conf>
