@@ -29,15 +29,21 @@ def main(log_file):
         #    out_of_target[item] = item
 
     # get target files
-    target_files = IOUtility.get_files_without_svn(path, extension)
+    target_files = IOUtil.get_files_without_svn(path, extension)
 
     # execute grep
     file_dic = {}
 
+    # write file open
+    f = open(file_name, 'w')
+    writer = csv.writer(f, delimiter=',',lineterminator="\n")
+    write_header(csv_writer)
+
+
     u'''grep for target file''' 
     for target_file in target_files:
 
-        if len(file_dic) > 180:
+        if len(file_dic) > 180: 
             break
 
         if not is_target(target_file, out_of_target):
@@ -52,7 +58,7 @@ def main(log_file):
         u'''grep with file name'''
         file = open(target_file, 'r')
         word_dic = {}
-        for f in IOUtility.get_all_files_without_svn(path):
+        for f in IOUtil.get_all_files_without_svn(path):
             if not is_target(f, out_of_target):
                 continue
 
@@ -62,11 +68,24 @@ def main(log_file):
             #line_dic = Grep.grep(target_file, f_name_without_ext)
             line_dic = Grep.grep_for_file(file, f_name_without_ext)
             file.seek(0,os.SEEK_SET)
+
             if f not in word_dic:
                 word_dic[f] = line_dic
 
-        file_dic[target_file] = word_dic
-        file.close
+        for word in sorted(word_dic):
+            line_dic = word_dic.get(word, {})
+            for line in sorted(line_dic):
+                value = line_dic.get(line, u'')
+                search_word, ext = os.path.splitext(os.path.basename(word))
+                writer.writerow([f_name,
+                                f,
+                                search_word,
+                                word,
+                                line,
+                                value])
+
+        #file_dic[target_file] = word_dic
+        #file.close
 
         end_time = datetime.datetime.now()
         print target_file + ' end:' + str(end_time)
@@ -75,32 +94,23 @@ def main(log_file):
 
         
     # output result
-    f = open(file_name, 'w')
-    writer = csv.writer(f, delimiter=',',lineterminator="\n")
-
-    writer.writerow([u'検索対象ファイル名'.encode('cp932'),
-                     u'検索対象ファイル名 (フルパス)'.encode('cp932'),
-                     u'検索文字列'.encode('cp932'),
-                     u'検索文字列 フルパス'.encode('cp932'),
-                     u'該当行番号'.encode('cp932'),
-                     u'該当行'.encode('cp932')])
     
-    for file_path in sorted(file_dic):
-        word_dic = file_dic.get(file_path, {})
+    #for file_path in sorted(file_dic):
+    #    word_dic = file_dic.get(file_path, {})
 
-        for word in sorted(word_dic):
-            line_dic = word_dic.get(word, {})
-            for line in sorted(line_dic):
-                value = line_dic.get(line, u'')
-                search_word, ext = os.path.splitext(os.path.basename(word))
-                writer.writerow([os.path.basename(file_path),
-                                file_path,
-                                search_word,
-                                word,
-                                line,
-                                value])
+    #    for word in sorted(word_dic):
+    #        line_dic = word_dic.get(word, {})
+    #        for line in sorted(line_dic):
+    #            value = line_dic.get(line, u'')
+    #            search_word, ext = os.path.splitext(os.path.basename(word))
+    #            writer.writerow([os.path.basename(file_path),
+    #                            file_path,
+    #                            search_word,
+    #                            word,
+    #                            line,
+    #                            value])
 
-    f.close
+    #f.close
     
 u'''validate arguments(default)'''
 def validate_argument(args):
@@ -157,6 +167,15 @@ def is_target(path, out_of_target):
             return False
 
     return True
+
+def write_header(csv_writer):
+    csv_writer.writerow([u'検索対象ファイル名'.encode('cp932'),
+                         u'検索対象ファイル名 (フルパス)'.encode('cp932'),
+                         u'検索文字列'.encode('cp932'),
+                         u'検索文字列 フルパス'.encode('cp932'),
+                         u'該当行番号'.encode('cp932'),
+                         u'該当行'.encode('cp932')])
+
 
 
 if __name__ == '__main__':
