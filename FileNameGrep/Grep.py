@@ -27,7 +27,7 @@ def grep_for_file(file, word):
 
     return result
 
-def grep_for_file_with_0(file, word, with_0_line):
+def grep_for_file_count_0(file, word, with_0_line):
     resutl = {}
     resutl = grep_for_file(file, word)
 

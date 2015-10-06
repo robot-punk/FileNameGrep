@@ -37,7 +37,7 @@ def main(log_file):
     # write file open
     f = open(file_name, 'w')
     writer = csv.writer(f, delimiter=',',lineterminator="\n")
-    write_header(csv_writer)
+    write_header(writer)
 
 
     u'''grep for target file''' 
@@ -66,7 +66,8 @@ def main(log_file):
             f_name_without_ext, ext = os.path.splitext(f_name)
 
             #line_dic = Grep.grep(target_file, f_name_without_ext)
-            line_dic = Grep.grep_for_file(file, f_name_without_ext)
+            #line_dic = Grep.grep_for_file(file, f_name_without_ext)
+            line_dic = Grep.grep_for_file_count_0(file, f_name_without_ext, True)
             file.seek(0,os.SEEK_SET)
 
             if f not in word_dic:
