@@ -27,11 +27,11 @@ def grep_for_file(file, word):
 
     return result
 
-def grep_for_file_count_0(file, word, with_0_line):
+def grep_for_file_with_0(file, word, with_0_line):
     resutl = {}
     resutl = grep_for_file(file, word)
 
-    if with_with_0_line :
+    if with_0_line :
         if len(resutl) == 0:
             resutl[0] = u'no match'
 
