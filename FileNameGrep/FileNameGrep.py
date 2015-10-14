@@ -66,12 +66,21 @@ def main(log_file):
             f_name_without_ext, ext = os.path.splitext(f_name)
 
             #line_dic = Grep.grep(target_file, f_name_without_ext)
-            #line_dic = Grep.grep_for_file(file, f_name_without_ext)
-            line_dic = Grep.grep_for_file_with_0(file, f_name_without_ext, True)
+            line_dic = Grep.grep_for_file(file, f_name_without_ext)
+            #line_dic = Grep.grep_for_file_with_0(file, f_name_without_ext, True)
+
             file.seek(0,os.SEEK_SET)
 
             if f not in word_dic:
                 word_dic[f] = line_dic
+
+        #if len(word_dic) == 0:
+        #        writer.writerow([os.path.basename(target_file),
+        #                        target_file,
+        #                        search_word,
+        #                        '',
+        #                        0,
+        #                        'no match'])
 
         for word in sorted(word_dic):
             line_dic = word_dic.get(word, {})
