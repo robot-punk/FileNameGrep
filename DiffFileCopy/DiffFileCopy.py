@@ -15,6 +15,7 @@ import shutil
 from datetime import datetime
 import difflib
 import filecmp
+import logging
  
 # 指定されたディレクトリパスのファイルのリストを
 # 指定されたファイルに書き込む
@@ -62,24 +63,31 @@ def get_diff_list(before, now):
     
 def main():
 
+    logging.basicConfig(filename='log/log.txt',level=logging.DEBUG)
+    logging.info('******バックアップ開始******')
+
     # 前回バックアップされたファイルの一覧を取得する。
     backup_dst_path = get_first_node_config('backup_dst_path')
     dst_list_file_name = add_time('log/dst_file_list')
     # file_lotate(dst_list_file_name)
     create_file_list(backup_dst_path, dst_list_file_name)
+    logging.info('前回バックアップしたファイルの一覧取得完了')
     
     # 現在のファイル一覧を作成する。
     backup_src_path = get_first_node_config('backup_src_path')
     src_list_file_name = add_time('log/src_file_list')
     # file_lotate(src_list_file_name)
     create_file_list(backup_src_path, src_list_file_name)
+    logging.info('バックアップ対象ディレクトリのファイルの一覧取得完了')
 
     # 現在と前回のファイルリストの差分を取得する。
     result = get_diff_list(dst_list_file_name, src_list_file_name)
+    logging.info('差分判定完了')
 
 
 
     # 増えたファイルをバックアップフォルダにコピーする。
+    logging.info('コピー開始')
     for line in result:
         if '+' in line:
             src_file = line.lstrip('+ ').rstrip()
@@ -92,7 +100,9 @@ def main():
                 os.makedirs(os.path.dirname(dst_file))
                 
             shutil.copy(src_file, dst_file)
-            print line
+            logging.info(dst_file)
+
+    logging.info('コピー完了')
 
 if __name__ == '__main__':
     sys.exit(main())
