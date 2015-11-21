@@ -1,0 +1,4 @@
+<config>
+  <backup_src_path>/Users/robot_punk/GitHub/python_programs/Lib/OwncloudBackup/src</backup_src_path>
+  <backup_dst_path>/Users/robot_punk/GitHub/python_programs/Lib/OwncloudBackup/dst</backup_dst_path>
+</config>
