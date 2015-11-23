@@ -16,6 +16,8 @@ from datetime import datetime
 import difflib
 import filecmp
 import logging
+from pprint import pprint
+
  
 # 指定されたディレクトリパスのファイルのリストを
 # 指定されたファイルに書き込む
@@ -46,49 +48,60 @@ def get_first_node_config(node_name):
     tree = parse('./config.xml')
     return tree.getroot().find(node_name).text
 
+# 指定された文字列に時間を付与する。
+# return: 与えられた文字列 + '_%Y%m%d_%H%M%S'
 def add_time(value):
     today = datetime.today()
     return value + '_' + datetime.now().strftime("%Y%m%d_%H%M%S")
     
+# ファイルの差分を取得する
+# return: 差分のリスト
 def get_diff_list(before, now):
     result = []
     d = difflib.Differ()
-    with open(before) as before_file_list:
-        with open(now) as now_file_list:
-            result  = list(d.compare(before_file_list.read().splitlines(1),
-                                    now_file_list.read().splitlines(1)))
-    
-    return result
+    with open(before, 'r') as before_file_list:
+        with open(now, 'r') as now_file_list:
+
+            backup_dst_path = get_first_node_config('backup_dst_path')
+            backup_src_path = get_first_node_config('backup_src_path')
+
+            b = before_file_list.read().replace(backup_dst_path, backup_src_path).splitlines(1)
+            print len(b)
+            n = now_file_list.read().splitlines(1)
+            print len(n)
+            result =  list(d.compare(b, n))
             
+    return result
     
-def main():
+# ファイルの差分を取得する
+# return: 差分だけのリスト
+# def get_diff_only_list(before, now):
+#     result = []
+# 
+#     with open(before, 'r') as before_file_list:
+#         with open(now, 'r') as now_file_list:
+# 
+#             backup_dst_path = get_first_node_config('backup_dst_path')
+#             backup_src_path = get_first_node_config('backup_src_path')
+# 
+#             b_list = before_file_list.read().replace(backup_dst_path, backup_src_path).splitlines(1)
+#             print len(b_list)
+#             n_list = now_file_list.read().splitlines(1)           
+#             print len(n_list)
+#             
+#             for n_line in n_list:
+#                 if n_line in before_file_list:
+#                      print n_line
+#                      result.append(n_line)
+#             
+#     return result
 
-    logging.basicConfig(filename='log/log.txt',level=logging.DEBUG)
-    logging.info('******バックアップ開始******')
-
-    # 前回バックアップされたファイルの一覧を取得する。
-    backup_dst_path = get_first_node_config('backup_dst_path')
-    dst_list_file_name = add_time('log/dst_file_list')
-    # file_lotate(dst_list_file_name)
-    create_file_list(backup_dst_path, dst_list_file_name)
-    logging.info('前回バックアップしたファイルの一覧取得完了')
-    
-    # 現在のファイル一覧を作成する。
-    backup_src_path = get_first_node_config('backup_src_path')
-    src_list_file_name = add_time('log/src_file_list')
-    # file_lotate(src_list_file_name)
-    create_file_list(backup_src_path, src_list_file_name)
-    logging.info('バックアップ対象ディレクトリのファイルの一覧取得完了')
-
-    # 現在と前回のファイルリストの差分を取得する。
-    result = get_diff_list(dst_list_file_name, src_list_file_name)
-    logging.info('差分判定完了')
-
-
-
-    # 増えたファイルをバックアップフォルダにコピーする。
-    logging.info('コピー開始')
-    for line in result:
+            
+# 差分のファイルをコピーする。
+# 引数：differ list
+# return: なし
+def copy_files(deff_list):
+    for line in deff_list:
         if '+' in line:
             src_file = line.lstrip('+ ').rstrip()
             dst_file = src_file.replace(get_first_node_config('backup_src_path'),
@@ -99,8 +112,46 @@ def main():
             if not os.path.exists(dst_dir):
                 os.makedirs(os.path.dirname(dst_file))
                 
+            print src_file
+            print dst_file
             shutil.copy(src_file, dst_file)
             logging.info(dst_file)
+
+
+
+def main():
+
+    logging.basicConfig(filename='log/log.txt',level=logging.DEBUG, datefmt='%Y/%m/%d %h:%M:%S %p',
+                        format='%(levelname)s\t%(asctime)s:%(message)s')
+    logging.info('******バックアップ開始******')
+
+    # 前回バックアップされたファイルの一覧を取得する。
+    backup_dst_path = get_first_node_config('backup_dst_path')
+    dst_list_file_name = add_time('log/dst_file_list')
+    # file_lotate(dst_list_file_name)
+    create_file_list(backup_dst_path, dst_list_file_name)
+    logging.info('前回バックアップしたファイルの一覧取得完了')
+    logging.info(dst_list_file_name)
+    
+    # 現在のファイル一覧を作成する。
+    backup_src_path = get_first_node_config('backup_src_path')
+    src_list_file_name = add_time('log/src_file_list')
+    # file_lotate(src_list_file_name)
+    create_file_list(backup_src_path, src_list_file_name)
+    logging.info('バックアップ対象ディレクトリのファイルの一覧取得完了')
+    logging.info(src_list_file_name)
+
+    # 現在と前回のファイルリストの差分を取得する。
+    # result = get_diff_only_list(dst_list_file_name, src_list_file_name)    
+    result = get_diff_list(dst_list_file_name, src_list_file_name)
+    logging.info('差分判定完了')
+
+
+
+    # 増えたファイルをバックアップフォルダにコピーする。
+    logging.info('コピー開始')
+    copy_files(result)
+
 
     logging.info('コピー完了')
 
