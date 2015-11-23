@@ -152,7 +152,6 @@ def main():
         logging.info('コピー開始')
         copy_files(result)
     
-        a = 1/0
         logging.info('コピー完了')    
     except Exception as inst:
         logging.info('異常終了')    
